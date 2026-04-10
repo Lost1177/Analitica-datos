@@ -24,3 +24,10 @@ El pipeline se divide en tres capas:
  - Puntualidad de vuelos
  - Costos de mantenimiento
  - Rutas más frecuentes
+
+📁 Estructura del repositorio
+- Analitica-datos/
+   - notebooks
+   - data
+
+  
