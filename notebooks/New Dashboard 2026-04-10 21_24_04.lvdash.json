@@ -1,0 +1,316 @@
+{
+  "datasets": [
+    {
+      "name": "193f8cdf",
+      "displayName": "Ventas Mensuales",
+      "queryLines": [
+        "SELECT\n",
+        "  date_trunc('month', CAST(v.fecha AS DATE)) as mes,\n",
+        "  d.categoria,\n",
+        "  v.producto,\n",
+        "  SUM(v.cantidad) as unidades_vendidas,\n",
+        "  SUM(v.cantidad * v.precio) as importe_total,\n",
+        "  AVG(v.precio) as precio_medio\n",
+        "FROM\n",
+        "  sesion_uno.data.productos v\n",
+        "    JOIN sesion_uno.data.dim_producto d\n",
+        "      ON v.producto = d.nombre_producto\n",
+        "WHERE\n",
+        "  CAST(v.fecha AS DATE) BETWEEN :fecha_desde AND :fecha_hasta\n",
+        "  AND (\n",
+        "    :categoria = 'All'\n",
+        "    OR d.categoria = :categoria\n",
+        "  )\n",
+        "GROUP BY\n",
+        "  date_trunc('month', CAST(v.fecha AS DATE)),\n",
+        "  d.categoria,\n",
+        "  v.producto\n",
+        "ORDER BY\n",
+        "  mes,\n",
+        "  categoria,\n",
+        "  producto"
+      ],
+      "parameters": [
+        {
+          "displayName": "Start Date",
+          "keyword": "fecha_desde",
+          "dataType": "DATE",
+          "defaultSelection": {
+            "values": {
+              "dataType": "DATE",
+              "values": [
+                {
+                  "value": "2025-01-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "End Date",
+          "keyword": "fecha_hasta",
+          "dataType": "DATE",
+          "defaultSelection": {
+            "values": {
+              "dataType": "DATE",
+              "values": [
+                {
+                  "value": "2025-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "Category",
+          "keyword": "categoria",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "All"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "09c77aa1",
+      "displayName": "Untitled page",
+      "layout": [
+        {
+          "widget": {
+            "name": "b07968db",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "193f8cdf",
+                  "fields": [
+                    {
+                      "name": "categoria",
+                      "expression": "`categoria`"
+                    },
+                    {
+                      "name": "mes",
+                      "expression": "`mes`"
+                    },
+                    {
+                      "name": "sum(importe_total)",
+                      "expression": "SUM(`importe_total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Monthly Sales Trend",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "mes",
+                  "displayName": "Month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(importe_total)",
+                  "displayName": "Total Amount",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "categoria",
+                  "displayName": "Category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 10,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_producto",
+            "queries": [
+              {
+                "name": "dashboards/01f1354d85fa1d4dbb0c4908f27b56cc/datasets/01f1354e236c192e9e941e81f76ea10f_producto",
+                "query": {
+                  "datasetName": "193f8cdf",
+                  "fields": [
+                    {
+                      "name": "producto",
+                      "expression": "`producto`"
+                    },
+                    {
+                      "name": "producto_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Product Filter",
+                "showTitle": true
+              },
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "producto",
+                    "queryName": "dashboards/01f1354d85fa1d4dbb0c4908f27b56cc/datasets/01f1354e236c192e9e941e81f76ea10f_producto"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_precio",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "193f8cdf",
+                  "fields": [
+                    {
+                      "name": "avg(precio_medio)",
+                      "expression": "AVG(`precio_medio`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Average Price",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(precio_medio)",
+                  "displayName": "Average Price"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_unidades",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "193f8cdf",
+                  "fields": [
+                    {
+                      "name": "sum(unidades_vendidas)",
+                      "expression": "SUM(`unidades_vendidas`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Units Sold",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(unidades_vendidas)",
+                  "displayName": "Total Units"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 5,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "ecce65af",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "7cb31b8e",
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {},
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
